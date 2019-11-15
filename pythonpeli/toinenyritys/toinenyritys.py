@@ -60,7 +60,7 @@ class Player(pygame.sprite.Sprite):
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((30, 30))
+        self.image = pygame.Surface((40, 40))
         self.image.fill(RED)
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(WIDTH - self.rect.width)
@@ -79,7 +79,7 @@ class Mob(pygame.sprite.Sprite):
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((5, 20))
+        self.image = pygame.Surface((8, 20))
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect()
         self.rect.bottom = y
