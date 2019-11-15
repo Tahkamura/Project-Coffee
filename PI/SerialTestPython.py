@@ -9,12 +9,13 @@ ser = serial.Serial(
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS,
-    timeout=5
+    # timeout=5
     )
 counter=0
 
 print ("aloitus")
 
 while 1:
-    #x=ser.readline()
-    print (ser.readline())
+    x=ser.readline()
+    #x=ser.read(ser.in_waiting)
+    print (x.decode('utf-8'))
