@@ -1,43 +1,146 @@
 import pygame
+import random
 
+WIDTH = 1270
+HEIGHT = 720
+FPS = 30
+
+# colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+
+# initialize pygame and create window
 pygame.init()
-
-win = pygame.display.set_mode((1920,1080), pygame.RESIZABLE)
+pygame.mixer.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Matiaksen peli")
+clock = pygame.time.Clock()
 
-x = 50
-y = 50
-width = 50
-height = 50
-vel = 5
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((40, 40))
+        self.image.fill(YELLOW)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = WIDTH / 2
+        self.rect.bottom = HEIGHT - 10
+        self.speedx = 0
+        self.speedy = 0
 
-run = True
+    def update(self):
+        self.speedx = 0
+        self.speedy = 0
+        keystate = pygame.key.get_pressed()
+        if keystate[pygame.K_LEFT]:
+            self.speedx = -8
+        if keystate[pygame.K_RIGHT]:
+            self.speedx = 8
+        if keystate[pygame.K_UP]:
+            self.speedy = -8
+        if keystate[pygame.K_DOWN]:
+            self.speedy = 8
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
+        if self.rect.right > WIDTH:
+            self.rect.right = WIDTH
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.y > HEIGHT - 40:
+            self.rect.y = HEIGHT - 40
+        if self.rect.y < 0:
+            self.rect.y = 0
 
-while run:
-    pygame.time.delay(20) # This will delay the game the given amount of milliseconds. In our casee 0.1 seconds will be the delay
+    def shoot(self):
+        bullet = Bullet(self.rect.centerx, self.rect.top)
+        all_sprites.add(bullet)
+        bullets.add(bullet)
+        
 
-    for event in pygame.event.get():  # This will loop through a list of any keyboard or mouse events.
-        if event.type == pygame.QUIT: # Checks if the red button in the corner of the window is clicked
-            run = False  # Ends the game loop
+class Mob(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((40, 40))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randrange(WIDTH - self.rect.width)
+        self.rect.y = random.randrange(-100, -40)
+        self.speedy = random.randrange(1, 2)
+        self.speedx = random.randrange(-3, 3)
 
-    keys = pygame.key.get_pressed()  # This will give us a dictonary where each key has a value of 1 or 0. Where 1 is pressed and 0 is not pressed.
+    def update(self):
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
+        if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
+            self.rect.x = random.randrange(WIDTH - self.rect.width)
+            self.rect.y = random.randrange(-100, -40)
+            self.speedy = random.randrange(1, 3)
 
-    if keys[pygame.K_LEFT] and x > vel: # We can check if a key is pressed like this
-        x -= vel
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((8, 20))
+        self.image.fill(YELLOW)
+        self.rect = self.image.get_rect()
+        self.rect.bottom = y
+        self.rect.centerx = x
+        self.speedy = -10
+        #self.speedx = -10 # ampuu sivulle
 
-    if keys[pygame.K_RIGHT] and x < 1540 - vel - width:
-        x += vel
+    def update(self):
+        self.rect.y += self.speedy
+        #self.rect.x += self.speedx # ampuu sivulle
 
-    if keys[pygame.K_UP] and y > vel:
-        y -= vel
+        # kill if it moves off the top of the screen
+        if self.rect.bottom < 0:
+            self.kill()
 
-    if keys[pygame.K_DOWN] and y < 805 - height - vel:
-        y += vel
+all_sprites = pygame.sprite.Group()
+mobs = pygame.sprite.Group()
+bullets = pygame.sprite.Group()
+player = Player()
+all_sprites.add(player)
+for i in range(8):
+    m = Mob()
+    all_sprites.add(m)
+    mobs.add(m)
 
+# Game loop
+running = True
+while running:
+    # keep loop running at the right speed
+    clock.tick(FPS)
+    # Process input (events)
+    for event in pygame.event.get():
+        # check for closing window
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                player.shoot()
 
-    win.fill((0, 0, 0))
-    pygame.draw.rect(win, (255,255,0), (x, y, width, height))  #This takes: window/surface, color, rect 
-    pygame.display.update() # This updates the screen so we can see our rectangle
+    # Update
+    all_sprites.update()
 
-pygame.quit()  # If we exit the loop this will execute and close our game
-    
+    # check to see if a bullet hit a mob
+    hits = pygame.sprite.groupcollide(mobs, bullets, True, True)
+    for hit in hits:
+        m = Mob()
+        all_sprites.add(m)
+        mobs.add(m)
+
+    # check to see if a mob hit the player
+    hits = pygame.sprite.spritecollide(player, mobs, False)
+    if hits:
+        running = False
+
+    # Draw / render
+    screen.fill(BLACK)
+    all_sprites.draw(screen)
+    # *after* drawing everything, flip the display
+    pygame.display.flip()
+
+pygame.quit()
