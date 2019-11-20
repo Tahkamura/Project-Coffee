@@ -17,7 +17,7 @@ print ('Connection address:', addr)
 while 1:
     data = conn.recv(BUFFER_SIZE)
     if not data: print('No data')
-    time.sleep(2)
-    print ("received data:", data)
+    time.sleep(0.02)
+    print (data.decode('utf-8'))
     conn.send(data)  # echo
 conn.close()
