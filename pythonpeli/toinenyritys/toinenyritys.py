@@ -49,13 +49,16 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = WIDTH
         if self.rect.left < 0:
             self.rect.left = 0
-        #if self.rect.up > HEIGHT:
-            #self.rect.up = HEIGHT
+        if self.rect.y > HEIGHT - 40:
+            self.rect.y = HEIGHT - 40
+        if self.rect.y < 0:
+            self.rect.y = 0
 
     def shoot(self):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(bullet)
         bullets.add(bullet)
+        
 
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
@@ -74,7 +77,7 @@ class Mob(pygame.sprite.Sprite):
         if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
             self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -40)
-            self.speedy = random.randrange(1, 8)
+            self.speedy = random.randrange(1, 3)
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -85,9 +88,12 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.bottom = y
         self.rect.centerx = x
         self.speedy = -10
+        #self.speedx = -10 # ampuu sivulle
 
     def update(self):
         self.rect.y += self.speedy
+        #self.rect.x += self.speedx # ampuu sivulle
+
         # kill if it moves off the top of the screen
         if self.rect.bottom < 0:
             self.kill()
