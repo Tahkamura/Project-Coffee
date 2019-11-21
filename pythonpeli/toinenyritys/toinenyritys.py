@@ -19,8 +19,12 @@ pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Matiaksen peli")
 clock = pygame.time.Clock()
+<<<<<<< HEAD
 counter = 0
 
+=======
+pygame.display.set_caption("jaakko on gei")
+>>>>>>> 9aad2c00641988ef09586c5a7e9b7e3ea070f352
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
