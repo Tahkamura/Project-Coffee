@@ -19,7 +19,12 @@ pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Matiaksen peli")
 clock = pygame.time.Clock()
+<<<<<<< HEAD
+counter = 0
+
+=======
 pygame.display.set_caption("jaakko on gei")
+>>>>>>> 9aad2c00641988ef09586c5a7e9b7e3ea070f352
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -88,14 +93,41 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.bottom = y
         self.rect.centerx = x
         self.speedy = -10
-        #self.speedx = -10 # ampuu sivulle
+        self.speedx = 0 # ampuu sivulle
 
     def update(self):
         self.rect.y += self.speedy
-        #self.rect.x += self.speedx # ampuu sivulle
+        self.rect.x += self.speedx # ampuu sivulle
+        #self.speedy = -10
+        global counter
 
-        # kill if it moves off the top of the screen
+        keystate = pygame.key.get_pressed()
+        if keystate[pygame.K_n]:
+            counter += 1
+            #self.speedx = 10
+            #self.speedy = 0
+        if counter == 1:
+                self.speedx = 10
+                self.speedy = 0
+        if counter == 2:
+                self.speedx = 0
+                self.speedy = 10
+        if counter == 3:
+                self.speedx = -10
+                self.speedy = 0
+        if counter == 4:
+                counter = 0
+        print(counter)
+
+
+        # kill if it moves off the screen
         if self.rect.bottom < 0:
+            self.kill()
+        if self.rect.top < 0:
+            self.kill()
+        if self.rect.left < 0:
+            self.kill()
+        if self.rect.y < 0:
             self.kill()
 
 all_sprites = pygame.sprite.Group()
