@@ -1,5 +1,7 @@
 import pygame
 import random
+import time
+#import keyboard
 
 WIDTH = 1270
 HEIGHT = 720
@@ -19,12 +21,12 @@ pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Matiaksen peli")
 clock = pygame.time.Clock()
-<<<<<<< HEAD
+#<<<<<<< HEAD
 counter = 0
 
-=======
-pygame.display.set_caption("jaakko on gei")
->>>>>>> 9aad2c00641988ef09586c5a7e9b7e3ea070f352
+#=======
+#pygame.display.set_caption("jaakko on gei")
+#>>>>>>> 9aad2c00641988ef09586c5a7e9b7e3ea070f352
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -94,30 +96,45 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.centerx = x
         self.speedy = -10
         self.speedx = 0 # ampuu sivulle
-
-    def update(self):
-        self.rect.y += self.speedy
-        self.rect.x += self.speedx # ampuu sivulle
-        #self.speedy = -10
         global counter
 
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_n]:
             counter += 1
+            
             #self.speedx = 10
             #self.speedy = 0
         if counter == 1:
                 self.speedx = 10
                 self.speedy = 0
+                pygame.sprite.Sprite.__init__(self)
+                self.image = pygame.Surface((20, 8))
+                self.image.fill(YELLOW)
+                self.rect = self.image.get_rect()
+                self.rect.bottom = y + 20
+                self.rect.centerx = x
         if counter == 2:
                 self.speedx = 0
                 self.speedy = 10
+                self.rect.bottom = y + 20
         if counter == 3:
                 self.speedx = -10
                 self.speedy = 0
+                pygame.sprite.Sprite.__init__(self)
+                self.image = pygame.Surface((20, 8))
+                self.image.fill(YELLOW)
+                self.rect = self.image.get_rect()
+                self.rect.bottom = y + 20
+                self.rect.centerx = x
         if counter == 4:
                 counter = 0
         print(counter)
+
+    def update(self):
+        self.rect.y += self.speedy
+        self.rect.x += self.speedx # ampuu sivulle
+        #self.speedy = -10
+
 
 
         # kill if it moves off the screen
@@ -127,8 +144,9 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
         if self.rect.left < 0:
             self.kill()
-        if self.rect.y < 0:
+        if self.rect.right > WIDTH:
             self.kill()
+        
 
 all_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
@@ -167,7 +185,8 @@ while running:
     # check to see if a mob hit the player
     hits = pygame.sprite.spritecollide(player, mobs, False)
     if hits:
-        running = False
+        print(":(")
+        #running = False
 
     # Draw / render
     screen.fill(BLACK)
