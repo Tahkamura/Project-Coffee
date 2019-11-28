@@ -19,10 +19,12 @@ YELLOW = (255, 255, 0)
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
-pygame.display.set_caption("Matiaksen peli")
+pygame.display.set_caption("Matiaksen peli ")
 clock = pygame.time.Clock()
 #<<<<<<< HEAD
 counter = 0
+score = 0
+
 
 #=======
 #pygame.display.set_caption("jaakko on gei")
@@ -128,7 +130,7 @@ class Bullet(pygame.sprite.Sprite):
                 self.rect.centerx = x
         if counter == 4:
                 counter = 0
-        print(counter)
+        #print(counter)
 
     def update(self):
         self.rect.y += self.speedy
@@ -182,11 +184,16 @@ while running:
         all_sprites.add(m)
         mobs.add(m)
 
+    if hits:
+        score = score + 1
+        print(score)
+
     # check to see if a mob hit the player
     hits = pygame.sprite.spritecollide(player, mobs, False)
     if hits:
-        print(":(")
-        #running = False
+        print(":'(")
+        running = False
+        print("Final score: ", score)
 
     # Draw / render
     screen.fill(BLACK)
