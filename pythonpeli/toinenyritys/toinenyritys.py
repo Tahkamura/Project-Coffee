@@ -19,7 +19,7 @@ YELLOW = (255, 255, 0)
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
-pygame.display.set_caption("Matiaksen peli ")
+pygame.display.set_caption("Matiaksen peli")
 clock = pygame.time.Clock()
 #<<<<<<< HEAD
 counter = 0
@@ -35,6 +35,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.Surface((40, 40))
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect()
+        #self.rect = self.image.load('player.png')
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 0
@@ -148,6 +149,14 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
         if self.rect.right > WIDTH:
             self.kill()
+
+font_name = pygame.font.match_font('arial')
+def draw_text(surf, text, size, x, y):
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, WHITE)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surf.blit(text_surface, text_rect)
         
 
 all_sprites = pygame.sprite.Group()
@@ -192,12 +201,16 @@ while running:
     hits = pygame.sprite.spritecollide(player, mobs, False)
     if hits:
         print(":'(")
+        #draw_text(screen, str(score), 18, WIDTH / 2, HEIGHT / 2)
         running = False
         print("Final score: ", score)
+        if score > 50:
+            print("Good job :)")
 
     # Draw / render
     screen.fill(BLACK)
     all_sprites.draw(screen)
+    draw_text(screen, str(score), 18, WIDTH / 2, 10)
     # *after* drawing everything, flip the display
     pygame.display.flip()
 
