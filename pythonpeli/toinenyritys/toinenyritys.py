@@ -35,7 +35,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.Surface((40, 40))
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect()
-        #self.rect = self.image.load('player.png')
+        #self.rect = self.image.load('player')
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 0
@@ -182,6 +182,8 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 player.shoot()
+            if event.key == pygame.K_n:
+                player.shoot()
 
     # Update
     all_sprites.update()
@@ -210,7 +212,7 @@ while running:
     # Draw / render
     screen.fill(BLACK)
     all_sprites.draw(screen)
-    draw_text(screen, str(score), 18, WIDTH / 2, 10)
+    draw_text(screen, str(score), 20, WIDTH / 2, 10)
     # *after* drawing everything, flip the display
     pygame.display.flip()
 
