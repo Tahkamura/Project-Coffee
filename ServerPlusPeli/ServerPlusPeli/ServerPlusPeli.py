@@ -146,13 +146,17 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.right > WIDTH:
             self.kill()
   
-class Gamerun():
-    @staticmethod
-    def Mainrun():
+class Gamerun(threading.Thread):
+    def __init__(self, threadID, name, counter):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+        self.counter = counter
+    def run(self):
         running = True
         while running:
             # keep loop running at the right speed
-            clock.tick(FPS)
+            #clock.tick(FPS)
             # Process input (events)
             for event in pygame.event.get():
                 # check for closing window
@@ -185,53 +189,42 @@ class Gamerun():
             # *after* drawing everything, flip the display
             pygame.display.flip()
 
-class Yhteys():
-    TCP_IP = '192.168.43.195' # <-current IP from Jaakkos phone. default: 127.0.0.1
-    TCP_PORT = 5005
-    BUFFER_SIZE = 20  # Normally 1024, but we want fast response
+class Yhteys(threading.Thread):
+    def __init__(self, threadID, name, counter):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+        self.counter = counter
+    def run(self):
+        print ('Starting Thread')
 
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((TCP_IP, TCP_PORT))
-    s.listen(1)
+        TCP_IP = '192.168.43.195' #127.0.0.1
+        TCP_PORT = 5005
+        BUFFER_SIZE = 20  # Normally 1024, but we want fast response
 
-    conn, addr = s.accept()
-    print ('Connection address:', addr)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind((TCP_IP, TCP_PORT))
+        s.listen(1)
 
-    def producer(queue, event):
-        """Pretend we're getting a number from the network."""
-        while not event.is_set():
-            # message = random.randint(1, 101)
+        conn, addr = s.accept()
+        print ('Connection address:', addr)
+        while 1:
             data = conn.recv(BUFFER_SIZE)
-            logging.info("Producer got message: %s", data)
-            queue.put(data)
-            print ("received data:", data.decode('utf-8'))
+            if not data: print('No data')
+            time.sleep(0.02)
+            print (data.decode('utf-8'))
             conn.send(data)  # echo
-    
-        logging.info("Producer received event. Exiting")
+        #conn.close()
 
-    def threading():
-            if __name__ == "__main__":
-                format = "%(asctime)s: %(message)s"
-                logging.basicConfig(format=format, level=logging.INFO,
-                                    datefmt="%H:%M:%S")
-
-                pipeline = queue.Queue()
-                event = threading.Event()
-                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                    executor.submit(producer, pipeline, event)
-                    executor.submit(consumer, pipeline, event)
-
-                    time.sleep(0.1)
-                    logging.info("Main: about to set event")
-                    event.set()
+        
    
 
 all_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 player = Player()
-run = Gamerun()
-#tcp = Yhteys()
+thread1 = Gamerun(1, "Thread-1", 1)
+thread2 = Yhteys(2, "Thread-2", 2)
 all_sprites.add(player)
 for i in range(8):
     m = Mob()
@@ -240,10 +233,37 @@ for i in range(8):
 
 # Game loop
 #running = True
-while 1:
-    run.Mainrun()
-    #tcp.producer()
-    #tcp.threading()
+def main():
+    WIDTH = 1270
+    HEIGHT = 720
+    FPS = 30
+
+    # colors
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    RED = (255, 0, 0)
+    GREEN = (0, 255, 0)
+    BLUE = (0, 0, 255)
+    YELLOW = (255, 255, 0)
+    pygame.init()
+    pygame.mixer.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+    pygame.display.set_caption("Matiaksen peli ")
+    clock = pygame.time.Clock()
+    counter = 0
+    score = 0
+    thread1.start()
+    thread2.start()
+
+    if score == 0:
+        player.shoot()
+    
+    #tähän if komentoja jos data = WASD niin liiku tai ammu ymsyms
+    
+
+if __name__ == "__main__":
+    main()
+    
 
 
-pygame.quit()
+#pygame.quit()
