@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 import random
 import time
 import concurrent.futures
@@ -6,10 +7,11 @@ import logging
 import queue
 import threading
 import socket
+import sys
 
-WIDTH = 1270
-HEIGHT = 720
-FPS = 30
+WIDTH = 1920
+HEIGHT = 1080
+#FPS = 30
 
 # colors
 WHITE = (255, 255, 255)
@@ -20,13 +22,22 @@ BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 
 # initialize pygame and create window
-pygame.init()
-pygame.mixer.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+#pygame.init()
+#pygame.mixer.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
+#screen = pygame.display.get_surface()
+#w,h = screen.get_width(),screen.get_height()
+#screen = pygame.display.set_mode((w,h),flags^FULLSCREEN,bits)
 pygame.display.set_caption("Matiaksen peli ")
 clock = pygame.time.Clock()
 counter = 0
 score = 0
+
+global data
+data = ""
+lock = threading.Lock()
+global nuq
+nuq = 0.002
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -35,13 +46,13 @@ class Player(pygame.sprite.Sprite):
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
-        self.rect.bottom = HEIGHT - 10
+        self.rect.bottom = HEIGHT/2
         self.speedx = 0
         self.speedy = 0
 
     def update(self):
-        self.speedx = 0
-        self.speedy = 0
+        #self.speedx = 0
+        #self.speedy = 0
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_LEFT]:
             self.speedx = -8
@@ -53,14 +64,14 @@ class Player(pygame.sprite.Sprite):
             self.speedy = 8
         self.rect.x += self.speedx
         self.rect.y += self.speedy
-        if self.rect.right > WIDTH:
-            self.rect.right = WIDTH
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.y > HEIGHT - 40:
-            self.rect.y = HEIGHT - 40
-        if self.rect.y < 0:
-            self.rect.y = 0
+        if self.rect.right > WIDTH-200:
+            self.rect.right = WIDTH-200
+        if self.rect.left < 200:
+            self.rect.left = 200
+        if self.rect.y > HEIGHT -80:
+            self.rect.y = HEIGHT-80
+        if self.rect.y < 80:
+            self.rect.y = 80
 
     def shoot(self):
         bullet = Bullet(self.rect.centerx, self.rect.top)
@@ -153,8 +164,26 @@ class Gamerun(threading.Thread):
         self.name = name
         self.counter = counter
     def run(self):
+        global data
+        global nuq
+        global counter
         running = True
         while running:
+            lock.acquire()
+            if data == "bam":
+                player.shoot()
+            if data == "vasen":
+                player.speedx = -8
+            if data == "oikea":
+                player.speedx = 8
+            if data == "ylos":
+                player.speedy = -8
+            if data == "alas":
+                player.speedy = 8
+            if data == "vaihto":
+                counter += 1
+            if counter == 4:
+                counter = 0
             # keep loop running at the right speed
             #clock.tick(FPS)
             # Process input (events)
@@ -182,12 +211,24 @@ class Gamerun(threading.Thread):
                 print(":'(")
                 running = False
                 print("Final score: ", score)
+                #screen.display.close()
+                
+                thread3._Thread_stop()
+                
+                pygame.quit()
+                thread1._Thread_stop()
+                
+               
+               
 
             # Draw / render
             screen.fill(BLACK)
             all_sprites.draw(screen)
             # *after* drawing everything, flip the display
             pygame.display.flip()
+            lock.release()
+            time.sleep(nuq)
+        pygame.quit()
 
 class Yhteys(threading.Thread):
     def __init__(self, threadID, name, counter):
@@ -197,6 +238,8 @@ class Yhteys(threading.Thread):
         self.counter = counter
     def run(self):
         print ('Starting Thread')
+        global data
+        global nuq
 
         TCP_IP = '192.168.43.195' #127.0.0.1
         TCP_PORT = 5005
@@ -209,15 +252,55 @@ class Yhteys(threading.Thread):
         conn, addr = s.accept()
         print ('Connection address:', addr)
         while 1:
+            lock.acquire()
             data = conn.recv(BUFFER_SIZE)
-            if not data: print('No data')
-            time.sleep(0.02)
             print (data.decode('utf-8'))
             conn.send(data)  # echo
+            lock.release()
+            time.sleep(nuq)
         #conn.close()
 
-        
-   
+class shoot (threading.Thread):
+   def __init__(self):
+      threading.Thread.__init__(self)
+   def run(self):
+      global data
+      muuttuja = 2
+      print ("Starting schoolshooting ")
+      while 1:
+          if muuttuja == 1:
+              lock.acquire()
+              data = "bam"
+              muuttuja = 2
+              lock.release()
+              #time.sleep(0.2)
+          if muuttuja == 2:
+              lock.acquire()
+              data = "vasen"
+              muuttuja = 3
+              lock.release()
+              #time.sleep(0.2)
+          if muuttuja == 3:
+              lock.acquire()
+              data = "oikea"
+              muuttuja = 4
+              lock.release()
+              #time.sleep(0.2)
+          if muuttuja == 4:
+              lock.acquire()
+              data = "ylos"
+              muuttuja = 5
+              lock.release()
+          if muuttuja == 5:
+              lock.acquire()
+              data = "alas"
+              muuttuja = 6
+              lock.release()
+          if muuttuja == 6:
+              lock.acquire()
+              data = "vaihto"
+              muuttuja = 1
+              lock.release()
 
 all_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
@@ -225,6 +308,7 @@ bullets = pygame.sprite.Group()
 player = Player()
 thread1 = Gamerun(1, "Thread-1", 1)
 thread2 = Yhteys(2, "Thread-2", 2)
+thread3 = shoot()
 all_sprites.add(player)
 for i in range(8):
     m = Mob()
@@ -233,9 +317,11 @@ for i in range(8):
 
 # Game loop
 #running = True
+
 def main():
-    WIDTH = 1270
-    HEIGHT = 720
+
+    WIDTH = 1920
+    HEIGHT = 1080
     FPS = 30
 
     # colors
@@ -247,23 +333,22 @@ def main():
     YELLOW = (255, 255, 0)
     pygame.init()
     pygame.mixer.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+    screen = pygame.display.get_surface()
+    pygame.display.set_mode((WIDTH,HEIGHT), pygame.FULLSCREEN)
+    #screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
     pygame.display.set_caption("Matiaksen peli ")
     clock = pygame.time.Clock()
     counter = 0
     score = 0
     thread1.start()
-    thread2.start()
-
-    if score == 0:
-        player.shoot()
+    #thread2.start()
+    thread3.start()
     
-    #tähän if komentoja jos data = WASD niin liiku tai ammu ymsyms
+
     
 
 if __name__ == "__main__":
     main()
+
     
-
-
 #pygame.quit()
