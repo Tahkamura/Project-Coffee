@@ -35,6 +35,8 @@ score = 0
 
 global data
 data = ""
+global data2
+data2 = ""
 lock = threading.Lock()
 global nuq
 nuq = 0.002
@@ -167,23 +169,39 @@ class Gamerun(threading.Thread):
         global data
         global nuq
         global counter
+        global data2
         running = True
         while running:
             lock.acquire()
-            if data == "bam":
+            print("Ykkosthreadin data:", data2)
+            while data2.find("Sormi 1") is not -1:
                 player.shoot()
-            if data == "vasen":
-                player.speedx = -8
-            if data == "oikea":
-                player.speedx = 8
-            if data == "ylos":
-                player.speedy = -8
-            if data == "alas":
-                player.speedy = 8
-            if data == "vaihto":
+                data2 = ""
+                break
+            while data2.find("Vasen") is not -1:
+                player.speedx = -4
+                break
+            while data2.find("Oikea") is not -1:
+                player.speedx = 4
+                break
+            while data2.find("Ylos") is not -1:
+                player.speedy = -4
+                break
+            while data2.find("Alas") is not -1:
+                player.speedy = 4
+                break
+            while data2.find("Sormi 2") is not -1:
                 counter += 1
+                data2 = ""
+                break
             if counter == 4:
                 counter = 0
+            while data2.find("XNada") is not -1:
+                player.speedx = 0
+                break
+            while data2.find("YNada") is not -1:
+                player.speedy = 0
+                break
             # keep loop running at the right speed
             #clock.tick(FPS)
             # Process input (events)
@@ -213,7 +231,7 @@ class Gamerun(threading.Thread):
                 print("Final score: ", score)
                 #screen.display.close()
                 
-                thread3._Thread_stop()
+               
                 
                 pygame.quit()
                 thread1._Thread_stop()
@@ -240,6 +258,7 @@ class Yhteys(threading.Thread):
         print ('Starting Thread')
         global data
         global nuq
+        global data2
 
         TCP_IP = '192.168.43.195' #127.0.0.1
         TCP_PORT = 5005
@@ -252,11 +271,12 @@ class Yhteys(threading.Thread):
         conn, addr = s.accept()
         print ('Connection address:', addr)
         while 1:
-            lock.acquire()
+            #lock.acquire()
             data = conn.recv(BUFFER_SIZE)
-            print (data.decode('utf-8'))
+            data2 = data.decode('utf-8')
+            #print (data2)
             conn.send(data)  # echo
-            lock.release()
+            #lock.release()
             time.sleep(nuq)
         #conn.close()
 
@@ -341,8 +361,8 @@ def main():
     counter = 0
     score = 0
     thread1.start()
-    #thread2.start()
-    thread3.start()
+    thread2.start()
+    #thread3.start()
     
 
     
