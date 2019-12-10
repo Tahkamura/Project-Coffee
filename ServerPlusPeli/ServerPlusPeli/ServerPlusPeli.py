@@ -28,8 +28,8 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
 #screen = pygame.display.get_surface()
 #w,h = screen.get_width(),screen.get_height()
 #screen = pygame.display.set_mode((w,h),flags^FULLSCREEN,bits)
-pygame.display.set_caption("Matiaksen peli ")
-clock = pygame.time.Clock()
+#pygame.display.set_caption("Patrick invaders")
+#clock = pygame.time.Clock()
 counter = 0
 score = 0
 
@@ -44,9 +44,14 @@ nuq = 0.002
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
+        self.images = []
         self.image = pygame.Surface((40, 40))
-        self.image.fill(YELLOW)
+        playerImage = pygame.image.load('C:/Users\Jaacco\Pictures\pixelship.png')
+        self.images.append(playerImage)
+        self.image = self.images[0]
         self.rect = self.image.get_rect()
+        #self.image.fill(YELLOW)
+        #self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT/2
         self.speedx = 0
@@ -70,23 +75,28 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = WIDTH-200
         if self.rect.left < 200:
             self.rect.left = 200
-        if self.rect.y > HEIGHT -80:
-            self.rect.y = HEIGHT-80
-        if self.rect.y < 80:
-            self.rect.y = 80
+        if self.rect.y > HEIGHT -150:
+            self.rect.y = HEIGHT-150
+        if self.rect.y < 100:
+            self.rect.y = 100
 
     def shoot(self):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(bullet)
         bullets.add(bullet)
-        
+       
 
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
+        self.images = []
         self.image = pygame.Surface((40, 40))
-        self.image.fill(RED)
+        mobImage = pygame.image.load('C:/Users\Jaacco\Pictures\mobster.png')
+        self.images.append(mobImage)
+        self.image = self.images[0]
         self.rect = self.image.get_rect()
+        #self.image.fill(RED)
+        #self.rect = self.image.get_rect()
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-100, -40)
         self.speedy = random.randrange(1, 2)
@@ -192,6 +202,7 @@ class Gamerun(threading.Thread):
                 break
             while data2.find("Sormi 2") is not -1:
                 counter += 1
+                player.shoot()
                 data2 = ""
                 break
             if counter == 4:
@@ -208,7 +219,7 @@ class Gamerun(threading.Thread):
             for event in pygame.event.get():
                 # check for closing window
                 if event.type == pygame.QUIT:
-                    running = False
+                    running = False   
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         player.shoot()
@@ -222,30 +233,26 @@ class Gamerun(threading.Thread):
                 m = Mob()
                 all_sprites.add(m)
                 mobs.add(m)
-
+            
             # check to see if a mob hit the player
             hits = pygame.sprite.spritecollide(player, mobs, False)
             if hits:
                 print(":'(")
                 running = False
                 print("Final score: ", score)
-                #screen.display.close()
-                
-               
-                
+                pygame.display.quit()
                 pygame.quit()
-                thread1._Thread_stop()
-                
-               
-               
+                sys.exit()     
 
             # Draw / render
             screen.fill(BLACK)
             all_sprites.draw(screen)
+
             # *after* drawing everything, flip the display
             pygame.display.flip()
             lock.release()
             time.sleep(nuq)
+
         pygame.quit()
 
 class Yhteys(threading.Thread):
@@ -330,16 +337,15 @@ thread1 = Gamerun(1, "Thread-1", 1)
 thread2 = Yhteys(2, "Thread-2", 2)
 thread3 = shoot()
 all_sprites.add(player)
-for i in range(8):
+for i in range(8): #<- number of patricks
     m = Mob()
     all_sprites.add(m)
     mobs.add(m)
 
 # Game loop
-#running = True
+running = True
 
 def main():
-
     WIDTH = 1920
     HEIGHT = 1080
     FPS = 30
@@ -356,7 +362,7 @@ def main():
     screen = pygame.display.get_surface()
     pygame.display.set_mode((WIDTH,HEIGHT), pygame.FULLSCREEN)
     #screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
-    pygame.display.set_caption("Matiaksen peli ")
+    pygame.display.set_caption("Patrick invaders")
     clock = pygame.time.Clock()
     counter = 0
     score = 0
@@ -365,10 +371,7 @@ def main():
     #thread3.start()
     
 
-    
-
 if __name__ == "__main__":
     main()
-
-    
+   
 #pygame.quit()
