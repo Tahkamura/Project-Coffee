@@ -18,4 +18,4 @@ print ("aloitus")
 while 1:
     x=ser.readline()
     #x=ser.read(ser.in_waiting)
-    print (x.decode('utf-8'))
+    print (x)

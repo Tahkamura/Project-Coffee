@@ -10,25 +10,25 @@ ser = serial.Serial(
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS,
-    #timeout=5
+    #timeout=0.01
     )
 counter=0
 
 TCP_IP = '192.168.43.195'
 TCP_PORT = 5005
-BUFFER_SIZE = 1024
-MESSAGE = 'Jaakko on NuGet'.encode()
+BUFFER_SIZE = 20
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((TCP_IP, TCP_PORT))
 
 while 1:
-    serialMessage=ser.readline()
+    serialMessage=ser.readline() #ser.read yksi byte, readline \n päätteiselle
+    #print (serialMessage)
     s.send(serialMessage)
     #time.sleep(0.5)
-    print (serialMessage.decode('utf-8'))
     data = s.recv(BUFFER_SIZE)
+    print ('received data;', data)
     
 s.close()
 
-# print ('received data;', data)
+
